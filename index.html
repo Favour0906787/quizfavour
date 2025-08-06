@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap Quiz with Timer</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #0c7356;
+        }
+        .quiz-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: rgb(37, 70, 178);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .timer {
+            font-size: 18px;
+            font-weight: bold;
+            color: #a1801c;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container my-5">
+    <div class="quiz-container">
+        <h2 class="text-center mb-4">Bootstrap Quiz</h2>
+
+        <!-- Quiz Box -->
+        <div id="quiz-box">
+            <div class="d-flex justify-content-between mb-2">
+                <p id="question" class="fw-bold"></p>
+                <div class="timer">Time: <span id="timer">10</span>s</div>
+            </div>
+            <div id="options" class="list-group mb-3"></div>
+            <button id="next-btn" class="btn btn-primary w-100">Next Question</button>
+            <div class="mt-4">
+                <div class="progress">
+                    <div id="progress-bar" class="progress-bar bg-success" style="width: 0%"></div>
+                </div>
+                <p class="mt-2 text-center">Score: <span id="score">0</span></p>
+            </div>
+        </div>
+
+        <!-- Result Box -->
+        <div id="result-box" class="text-center d-none">
+            <h3>Quiz Completed!</h3>
+            <p>Your score: <span id="final-score"></span></p>
+            <button id="restart-btn" class="btn btn-success mt-3">Restart Quiz</button>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const quizData = [
+        { question: "What is the capital of France?", options: ["Rome", "berlin", "nigeria", "paris"], answer: "paris" },
+        { question: "Who wrote 'Romeo and Juilet' ?", options: ["Chales Dicken", "john mark", "Williams shakespare", "Favour kelechi"], answer: "Williams shakespare"},
+        { question: "how many continent are there in the world?", options: ["4", "9", "8"], answer: "9" }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let timer;
+    let timeLeft = 10;
+
+    const questionEl = document.getElementById('question');
+    const optionsEl = document.getElementById('options');
+    const nextBtn = document.getElementById('next-btn');
+    const scoreEl = document.getElementById('score');
+    const progressBar = document.getElementById('progress-bar');
+    const resultBox = document.getElementById('result-box');
+    const quizBox = document.getElementById('quiz-box');
+    const finalScoreEl = document.getElementById('final-score');
+    const restartBtn = document.getElementById('restart-btn');
+    const timerEl = document.getElementById('timer');
+
+    function loadQuestion() {
+        const q = quizData[currentQuestion];
+        questionEl.textContent = q.question;
+        optionsEl.innerHTML = '';
+        q.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'list-group-item list-group-item-action';
+            btn.textContent = opt;
+            btn.onclick = () => selectAnswer(index);
+            optionsEl.appendChild(btn);
+        });
+        updateProgress();
+        resetTimer();
+    }
+
+    function selectAnswer(index) {
+        const correct = quizData[currentQuestion].answer;
+        const buttons = optionsEl.querySelectorAll('button');
+        // console.log(correct);
+        
+
+        buttons.forEach((btn, i) => {
+            btn.disabled = true;
+            if (i === correct) btn.classList.add('list-group-item-success');
+            else if (i === index) btn.classList.add('list-group-item-danger');
+        });
+
+        if (index === correct) score++;
+        scoreEl.textContent = score;
+        clearInterval(timer); // Stop timer when answer is selected
+    }
+
+    function updateProgress() {
+        progressBar.style.width = `${((currentQuestion + 1) / quizData.length) * 100}%`;
+    }
+
+    function resetTimer() {
+        clearInterval(timer);
+        timeLeft = 10;
+        timerEl.textContent = timeLeft;
+
+        timer = setInterval(() => {
+            timeLeft--;
+            timerEl.textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                lockOptions();
+            }
+        }, 1000);
+    }
+
+    function lockOptions() {
+        const correct = quizData[currentQuestion].answer;
+        const buttons = optionsEl.querySelectorAll('button');
+
+        buttons.forEach((btn, i) => {
+            btn.disabled = true;
+            if (i === correct) btn.classList.add('list-group-item-success');
+        });
+    }
+
+    nextBtn.onclick = () => {
+        if (currentQuestion < quizData.length - 1) {
+            currentQuestion++;
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    };
+
+    function showResult() {
+        quizBox.classList.add('d-none');
+        resultBox.classList.remove('d-none');
+        finalScoreEl.textContent = `${score} / ${quizData.length}`;
+    }
+
+    restartBtn.onclick = () => {
+        currentQuestion = 0;
+        score = 0;
+        scoreEl.textContent = score;
+        quizBox.classList.remove('d-none');
+        resultBox.classList.add('d-none');
+        loadQuestion();
+    };
+
+    loadQuestion();
+</script>
+</body>
+</html>
