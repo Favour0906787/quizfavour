@@ -91,7 +91,7 @@
             const btn = document.createElement('button');
             btn.className = 'list-group-item list-group-item-action';
             btn.textContent = opt;
-            btn.onclick = () => selectAnswer(index);
+            btn.onclick = () => {selectAnswer(index)};
             optionsEl.appendChild(btn);
         });
         updateProgress();
@@ -101,19 +101,26 @@
     function selectAnswer(index) {
         const correct = quizData[currentQuestion].answer;
         const buttons = optionsEl.querySelectorAll('button');
-        // console.log(correct);
+        const selectedText = quizData[currentQuestion].options[index];
+        console.log(selectedText);
         
 
-        buttons.forEach((btn, i) => {
+        buttons.forEach((btn) => {
             btn.disabled = true;
-            if (i === correct) btn.classList.add('list-group-item-success');
-            else if (i === index) btn.classList.add('list-group-item-danger');
+            if (btn.textContent === correct) {
+                btn.classList.add('list-group-item-success');
+            } else if (btn.textContent === selectedText && selectedText !== correct) {
+                btn.classList.add('list-group-item-danger');
+            }
         });
 
-        if (index === correct) score++;
+        if (selectedText === correct) {
+            score++;
+        }
         scoreEl.textContent = score;
         clearInterval(timer); // Stop timer when answer is selected
     }
+
 
     function updateProgress() {
         progressBar.style.width = `${((currentQuestion + 1) / quizData.length) * 100}%`;
@@ -139,11 +146,14 @@
         const correct = quizData[currentQuestion].answer;
         const buttons = optionsEl.querySelectorAll('button');
 
-        buttons.forEach((btn, i) => {
+        buttons.forEach((btn) => {
             btn.disabled = true;
-            if (i === correct) btn.classList.add('list-group-item-success');
+            if (btn.textContent === correct) {
+                btn.classList.add('list-group-item-success');
+            }
         });
     }
+
 
     nextBtn.onclick = () => {
         if (currentQuestion < quizData.length - 1) {
